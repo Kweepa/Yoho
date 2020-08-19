@@ -1,0 +1,36 @@
+Adventureland
+adv01
+Pirate Adventure
+adv02
+Mission Impossible
+adv03
+Voodoo Castle
+adv04
+The Count
+adv05
+Strange Odyssey
+adv06
+Mystery Fun House
+adv07
+Pyramid of Doom
+adv08
+Ghost Town
+adv09
+Savage Island, Part I
+adv10
+Savage Island, Part II
+adv11
+The Golden Voyage
+adv12
+Sorcerer of Claymorgue Castle
+adv13
+Return to Pirate's Isle
+adv14a
+Buckaroo Banzai
+adv14b
+Questprobe #1: The Hulk
+quest1
+Questprobe #2: Spiderman
+quest2
+Adventureland (sampler)
+sampler1
