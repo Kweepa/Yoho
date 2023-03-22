@@ -15,6 +15,7 @@ typedef struct
    unsigned char versionMajor;
    unsigned char versionMinor;
    unsigned char adventureNumber;
+   unsigned short counterLookup[20];
 } SHeader;
 
 enum EActionConditionType

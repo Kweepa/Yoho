@@ -297,11 +297,11 @@ char testConditions(unsigned char numCond)
          break;
       case kCond_CounterLessOrEqual:
          // need to ensure that <= 0 works
-         f1 = sd.cnt <= (int) d;
+         f1 = sd.cnt <= (int) head->counterLookup[d];
          break;
       case kCond_CounterGreater:
          // need to ensure that -cnt > d fails
-         f1 = sd.cnt > (int) d;
+         f1 = sd.cnt > (int) head->counterLookup[d];
          break;
       case kCond_ObjectInOriginalRoom:
          f1 = sd.objLoc[d] == objs[d].startRoom;
@@ -310,7 +310,7 @@ char testConditions(unsigned char numCond)
          f1 = sd.objLoc[d] != objs[d].startRoom;
          break;
       case kCond_CounterEqual:
-         f1 = sd.cnt == d;
+         f1 = sd.cnt == head->counterLookup[d];
          break;
       }
       f2 = f2 && f1;
@@ -491,7 +491,7 @@ int doAction(unsigned char cmd)
       printCbm(" ");
       break;
    case kCmd_SetCounter:
-      sd.cnt = p1;
+      sd.cnt = head->counterLookup[p1];
       break;
    case kCmd_ExchangeRoomRegister0:
       {
@@ -508,10 +508,10 @@ int doAction(unsigned char cmd)
       }
       break;
    case kCmd_AddToCounter:
-      sd.cnt += p1;
+      sd.cnt += head->counterLookup[p1];
       break;
    case kCmd_SubtractFromCounter:
-      sd.cnt -= p1;
+      sd.cnt -= head->counterLookup[p1];
       if (sd.cnt < -1)
       {
          sd.cnt = -1;
@@ -1019,6 +1019,9 @@ int main(int argc, char *argv[])
 {
    char i, numAdv;
    char *name;
+   
+   printf("End\n");
+   return 1;
 
    CaseLock = 128; // lock
    ScreenBorderColor = 8 + 6; // 8 for black BG, + 6 for blue border
@@ -1067,7 +1070,7 @@ int main(int argc, char *argv[])
       rooms = (SRoom *) (messages + head->messageCount);
       objs = (SObject *) (rooms + head->roomCount);
       // read what's left
-      strings = (char *) (objs + head->objectCount);
+      strings = (char *) (head + 1);
 
       printCbm_cr("hit RETURN to begin ADVENTURE");
       cgetc();

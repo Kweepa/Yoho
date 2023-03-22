@@ -134,8 +134,31 @@ void read_vocab(FILE *fp, SVocab *words, int i, int &synonymFor)
    words[i].synonymFor = synonymFor;
 }
 
+unsigned char getCounterLookup(SHeader &head, int &numLookups, short data)
+{
+	bool found = false;
+	for (int i = 0; i < numLookups; ++i)
+	{
+		if (head.counterLookup[i] == data)
+		{
+			data = i;
+			found = true;
+			break;
+		}
+	}
+	if (!found)
+	{
+		head.counterLookup[numLookups] = data;
+		data = numLookups++;
+	}
+
+	return data;
+}
+
 int convert(char *inputFile, char *outputFile, char *txtFile)
 {
+	int numLookups = 0;
+
    FILE *fp = fopen(inputFile, "r");
    if (fp)
    {
@@ -162,7 +185,7 @@ int convert(char *inputFile, char *outputFile, char *txtFile)
       unsigned char *ap = acts;
       for (int x = 0; x < head.actionCount; ++x)
       {
-         unsigned char parms[5];
+         unsigned int parms[5];
          int ip = 0;
          int ic = 0;
          int verbNoun = read_int(fp);
@@ -178,11 +201,15 @@ int convert(char *inputFile, char *outputFile, char *txtFile)
          for (int c = 0; c < 5; ++c)
          {
             int typePar = read_int(fp);
-            unsigned char data = typePar/20;
+            unsigned int data = typePar/20;
             unsigned char cond = typePar-20*data;
 
             if (cond)
             {
+				if (cond == kCond_CounterEqual || cond == kCond_CounterGreater || cond == kCond_CounterLessOrEqual)
+				{
+					data = getCounterLookup(head, numLookups, data);
+				}
                *ap++ = cond;
                *ap++ = data;
                ++numCond;
@@ -224,6 +251,10 @@ int convert(char *inputFile, char *outputFile, char *txtFile)
                case kCmd_AddToCounter:
                case kCmd_SubtractFromCounter:
                case kCmd_ExchangeRoomRegister:
+				   if (cmd == kCmd_SetCounter || cmd == kCmd_AddToCounter || cmd == kCmd_SubtractFromCounter)
+				   {
+					   parms[ip] = getCounterLookup(head, numLookups, parms[ip]);
+				   }
                   *ap++ = parms[ip++];
                   ++numAct;
                   break;
@@ -246,6 +277,8 @@ int convert(char *inputFile, char *outputFile, char *txtFile)
       }
       int oldCount = head.actionCount;
       head.actionCount = ap - acts;
+
+	  printf("Num counter lookups = %d\n", numLookups);
 
       printf("Action size reduced from %d to %d\n", oldCount*sizeof(SAction), head.actionCount);
 
@@ -451,10 +484,10 @@ int convert(char *inputFile, char *outputFile, char *txtFile)
                      fprintf(fp, "stored '%s' ", ob(&objs[data]));
                      break;
                   case kCond_CounterLessOrEqual:
-                     fprintf(fp, "c<= %d ", data);
+                     fprintf(fp, "c<= %d ", head.counterLookup[data]);
                      break;
                   case kCond_CounterGreater:
-                     fprintf(fp, "c> %d ", data);
+                     fprintf(fp, "c> %d ", head.counterLookup[data]);
                      break;
                   case kCond_ObjectInOriginalRoom:
                      fprintf(fp, "-moved '%s' ", ob(&objs[data]));
@@ -463,7 +496,7 @@ int convert(char *inputFile, char *outputFile, char *txtFile)
                      fprintf(fp, "moved '%s' ", ob(&objs[data]));
                      break;
                   case kCond_CounterEqual:
-                     fprintf(fp, "c== %d ", data);
+                     fprintf(fp, "c== %d ", head.counterLookup[data]);
                      break;
                   }
                }
@@ -570,7 +603,7 @@ int convert(char *inputFile, char *outputFile, char *txtFile)
                      fprintf(fp, "dispcnt ");
                      break;
                   case kCmd_SetCounter:
-                     fprintf(fp, "setcnt %d ", p1);
+                     fprintf(fp, "setcnt %d ", head.counterLookup[p1]);
                      break;
                   case kCmd_ExchangeRoomRegister0:
                      fprintf(fp, "xrr0 ");
@@ -579,10 +612,10 @@ int convert(char *inputFile, char *outputFile, char *txtFile)
                      fprintf(fp, "xcnt %d ", p1);
                      break;
                   case kCmd_AddToCounter:
-                     fprintf(fp, "addcnt %d ", p1);
+                     fprintf(fp, "addcnt %d ", head.counterLookup[p1]);
                      break;
                   case kCmd_SubtractFromCounter:
-                     fprintf(fp, "subcnt %d ", p1);
+                     fprintf(fp, "subcnt %d ", head.counterLookup[p1]);
                      break;
                   case kCmd_SayNoun:
                      fprintf(fp, "saynoun ");
