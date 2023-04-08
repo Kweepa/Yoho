@@ -1020,14 +1020,11 @@ int main(int argc, char *argv[])
    char i, numAdv;
    char *name;
    
-   printf("End\n");
-   return 1;
-
    CaseLock = 128; // lock
-   ScreenBorderColor = 8 + 6; // 8 for black BG, + 6 for blue border
+   ScreenBorderColor = 8 + 2; // 8 for black BG, + 6 for blue border
    propfont_cls();
    propfont_setup();
-   propfont_setcol(2); // white characters (7 for yellow)
+   propfont_setcol(3); // white characters (7 for yellow)
 
    showIntro();
 
@@ -1070,9 +1067,9 @@ int main(int argc, char *argv[])
       rooms = (SRoom *) (messages + head->messageCount);
       objs = (SObject *) (rooms + head->roomCount);
       // read what's left
-      strings = (char *) (head + 1);
-
-      printCbm_cr("hit RETURN to begin ADVENTURE");
+      strings = (char *) (objs + head->objectCount);
+      
+	  printCbm_cr("hit RETURN to begin ADVENTURE");
       cgetc();
       cr();
 
